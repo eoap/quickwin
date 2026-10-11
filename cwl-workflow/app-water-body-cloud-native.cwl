@@ -11,12 +11,7 @@ $graph:
   requirements:
     SchemaDefRequirement:
       types:
-      - name: '#URI'
-        type: record
-        fields:
-        - name: value
-          type: string
-          doc: Absolute STAC Item URL.
+      - $import: https://raw.githubusercontent.com/eoap/schemas/main/string_format.yaml
       - name: '#BBox'
         type: record
         fields:
@@ -64,7 +59,7 @@ $graph:
     item:
       doc: STAC Item URL.
       label: item
-      type: URI
+      type: https://raw.githubusercontent.com/eoap/schemas/main/string_format.yaml#URI
   outputs:
   - id: stac_catalog
     outputSource:
@@ -104,7 +99,7 @@ $graph:
   arguments: []
   inputs:
     item:
-      type: URI
+      type: https://raw.githubusercontent.com/eoap/schemas/main/string_format.yaml#URI
       inputBinding:
         prefix: --input-item
         valueFrom: $(self.value)

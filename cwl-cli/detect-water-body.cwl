@@ -12,12 +12,7 @@ requirements:
     dockerPull: localhost/detect-water-body:latest
   SchemaDefRequirement:
     types:
-    - name: '#URI'
-      type: record
-      fields:
-      - name: value
-        type: string
-        doc: Absolute STAC Item URL.
+    - $import: https://raw.githubusercontent.com/eoap/schemas/main/string_format.yaml
     - name: '#BBox'
       type: record
       fields:
@@ -52,7 +47,7 @@ baseCommand:
 arguments: []
 inputs:
   item:
-    type: URI
+    type: https://raw.githubusercontent.com/eoap/schemas/main/string_format.yaml#URI
     inputBinding:
       prefix: --input-item
       valueFrom: $(self.value)

@@ -17,3 +17,11 @@ practice-labs/output.json
 
 practice-labs/cwl-cli-output.json
 practice-labs/cwl-workflow-output.json
+
+# Generated Hatch build context for the container practice lab.
+practice-labs/.dockerignore
+practice-labs/pyproject.toml
+practice-labs/README.md
+practice-labs/LICENSE.md
+practice-labs/requirements/
+practice-labs/detect_water_body/

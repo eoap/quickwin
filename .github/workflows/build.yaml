@@ -11,7 +11,30 @@ on:
 permissions:
   contents: read
 jobs:
+  processing-quality:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: water-bodies/command-line-tools/detect-water-body
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install the locked build and validation tools
+        run: |
+          uv venv --python 3.12 .venv
+          uv pip install --require-hashes -r requirements/development.txt
+          uv pip install --no-deps --no-build-isolation -e .
+      - name: Validate fresh Hatch quality and scientific unit contracts
+        run: |
+          .venv/bin/hatch run dev:check
+          .venv/bin/hatch run test:test
+      - name: Build and check installed processing entrypoints
+        run: |
+          docker build -t quickwin-processing:acceptance .
+          docker run --rm quickwin-processing:acceptance detect-water-body --help
+          docker run --rm quickwin-processing:acceptance python -m app --help
   acceptance:
+    needs: processing-quality
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
