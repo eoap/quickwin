@@ -10,6 +10,7 @@ from loguru import logger
 from numpy.typing import NDArray
 from pyproj import Transformer
 from pystac.extensions.eo import AssetEOExtension
+from rasterio.mask import mask
 from shapely import box
 from skimage.filters import threshold_otsu
 
@@ -43,7 +44,7 @@ def crop(
 
         logger.info(f"Crop {asset.get_absolute_href()}")
 
-        out_image, out_transform = rasterio.mask.mask(src, [transformed_bbox], crop=True)
+        out_image, out_transform = mask(src, [transformed_bbox], crop=True)
         out_meta: dict[str, object] = src.meta.copy()
 
         out_meta.update(
