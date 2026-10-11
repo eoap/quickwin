@@ -43,6 +43,8 @@ requirements:
       - green
       - nir
   InlineJavascriptRequirement: {}
+  NetworkAccess:
+    networkAccess: true
 baseCommand:
 - python
 - -m

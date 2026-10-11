@@ -92,6 +92,8 @@ $graph:
     ResourceRequirement:
       coresMax: 1
       ramMax: 512
+    NetworkAccess:
+      networkAccess: true
   hints:
     DockerRequirement:
       dockerPull: localhost/detect-water-body:latest
