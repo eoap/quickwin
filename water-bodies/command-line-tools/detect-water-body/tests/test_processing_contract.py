@@ -76,3 +76,57 @@ def test_crop_preserves_pixels_and_spatial_transform(tmp_path):
     assert cropped.dtype == np.float32
     assert metadata["transform"] == from_origin(2, 12, 1, 1)
     assert metadata["width"] == metadata["height"] == 8
+
+
+def test_binary_output_keeps_zero_as_valid_land(tmp_path, monkeypatch):
+    import rasterio
+    from pystac.extensions.eo import Band, EOExtension
+    from rasterio.transform import from_origin
+
+    # Explicit unit fixture; the separate Minikube acceptance uses real EO pixels.
+    item = pystac.Item("binary-unit-fixture", None, None, datetime(2021, 1, 1, tzinfo=UTC), {})
+    green = np.ones((16, 16), dtype=np.uint16)
+    green[:, 8:] = 9
+    for band, pixels in [("green", green), ("nir", 10 - green)]:
+        path = tmp_path / f"{band}.tif"
+        with rasterio.open(
+            path,
+            "w",
+            driver="GTiff",
+            height=16,
+            width=16,
+            count=1,
+            dtype="uint16",
+            crs="EPSG:4326",
+            nodata=0,
+            transform=from_origin(0, 16, 1, 1),
+        ) as dataset:
+            dataset.write(pixels, 1)
+        asset = pystac.Asset(str(path), roles=["data"])
+        item.add_asset(band, asset)
+        EOExtension.ext(asset, add_if_missing=True).bands = [
+            Band.create(name=band, common_name=band)
+        ]
+    path = tmp_path / "item.json"
+    item.save_object(dest_href=str(path))
+    monkeypatch.chdir(tmp_path)
+    result = CliRunner().invoke(
+        main,
+        [
+            "--input-item",
+            str(path),
+            "--aoi",
+            "0,0,16,16",
+            "--epsg",
+            "EPSG:4326",
+            "--band",
+            "green",
+            "--band",
+            "nir",
+        ],
+    )
+    assert result.exit_code == 0, result.exception
+    with rasterio.open(tmp_path / "otsu.tif") as output:
+        assert output.nodata is None
+        assert output.read(1, masked=True).count() == 256
+        np.testing.assert_array_equal(output.read(1), green > 1)

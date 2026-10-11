@@ -166,6 +166,7 @@ def main(item_url: str, aoi: str, bands: tuple[str, ...], epsg: str) -> None:
     out_meta.update(
         {
             "dtype": "uint8",
+            "nodata": None,
             "driver": "COG",
             "tiled": True,
             "compress": "lzw",
