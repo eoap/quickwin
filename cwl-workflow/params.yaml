@@ -5,7 +5,7 @@ aoi:
   south: 39.834
   east: -120.74
   north: 40.472
-epsg: EPSG4326
+epsg: '4326'
 bands:
 - green
 - nir

@@ -35,7 +35,7 @@ $graph:
       - name: '#CRS'
         type: enum
         symbols:
-        - EPSG4326
+        - '4326'
       - name: '#Band'
         type: enum
         symbols:
@@ -49,9 +49,9 @@ $graph:
       type: BBox
     epsg:
       label: epsg
-      doc: EPSG4326 enum selecting geographic longitude/latitude coordinates (EPSG:4326).
+      doc: Quoted EPSG code ("4326") selecting geographic longitude/latitude coordinates.
       type: CRS
-      default: EPSG4326
+      default: '4326'
     bands:
       label: bands
       doc: Green and near-infrared bands in NDWI order.
@@ -121,9 +121,9 @@ $graph:
       type: CRS
       inputBinding:
         prefix: --epsg
-        valueFrom: $("EPSG:4326")
+        valueFrom: $("EPSG:" + self)
       label: epsg
-      doc: EPSG4326 enum selecting geographic longitude/latitude coordinates (EPSG:4326).
+      doc: Quoted EPSG code ("4326") selecting geographic longitude/latitude coordinates.
     band:
       type:
         type: array

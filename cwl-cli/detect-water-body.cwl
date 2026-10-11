@@ -36,7 +36,7 @@ requirements:
     - name: '#CRS'
       type: enum
       symbols:
-      - EPSG4326
+      - '4326'
     - name: '#Band'
       type: enum
       symbols:
@@ -69,9 +69,9 @@ inputs:
     type: CRS
     inputBinding:
       prefix: --epsg
-      valueFrom: $("EPSG:4326")
+      valueFrom: $("EPSG:" + self)
     label: epsg
-    doc: EPSG4326 enum selecting geographic longitude/latitude coordinates (EPSG:4326).
+    doc: Quoted EPSG code ("4326") selecting geographic longitude/latitude coordinates.
   band:
     type:
       type: array
