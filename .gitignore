@@ -14,3 +14,6 @@ practice-labs/output.json
 
 .venv/
 .oci-venv/
+
+practice-labs/cwl-cli-output.json
+practice-labs/cwl-workflow-output.json

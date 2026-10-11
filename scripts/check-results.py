@@ -1,11 +1,21 @@
 """Verify real Lake Almanor outputs from all four Quickwin notebooks."""
 from pathlib import Path
+import json
+from urllib.parse import urlparse, unquote
 import numpy as np
 import pystac
 import rasterio
 from rasterio.warp import transform_bounds
 root = Path(__file__).resolve().parents[1]
-for directory in (root / 'practice-labs', root / 'runs', root / 'runs/cwl-cli', root / 'runs/cwl-workflow'):
+directories = [root / 'practice-labs', root / 'runs']
+for filename, output in [('cwl-cli-output.json', 'water-body'), ('cwl-workflow-output.json', 'stac_catalog')]:
+    result = json.loads((root / 'practice-labs' / filename).read_text())[output]
+    assert result['class'] == 'Directory'
+    location = urlparse(result['location'])
+    assert location.scheme == 'file', result
+    directories.append(Path(unquote(location.path)))
+assert len(set(directories)) == 4, directories
+for directory in directories:
     catalog = pystac.Catalog.from_file(str(directory / 'catalog.json'))
     items = list(catalog.get_all_items())
     assert items, f'Empty catalog: {directory}'
