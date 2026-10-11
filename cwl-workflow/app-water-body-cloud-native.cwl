@@ -1,7 +1,6 @@
 cwlVersion: v1.2
 $namespaces:
   s: https://schema.org/
-  EPSG: http://www.opengis.net/def/crs/EPSG/0/
 s:softwareVersion: 2.0.0
 $graph:
 - class: Workflow
@@ -36,7 +35,7 @@ $graph:
       - name: '#CRS'
         type: enum
         symbols:
-        - EPSG:4326
+        - EPSG4326
       - name: '#Band'
         type: enum
         symbols:
@@ -50,9 +49,9 @@ $graph:
       type: BBox
     epsg:
       label: epsg
-      doc: Coordinate reference system of the bounding box.
+      doc: EPSG4326 enum selecting geographic longitude/latitude coordinates (EPSG:4326).
       type: CRS
-      default: EPSG:4326
+      default: EPSG4326
     bands:
       label: bands
       doc: Green and near-infrared bands in NDWI order.
@@ -120,8 +119,9 @@ $graph:
       type: CRS
       inputBinding:
         prefix: --epsg
+        valueFrom: $("EPSG:4326")
       label: epsg
-      doc: Coordinate reference system of the bounding box.
+      doc: EPSG4326 enum selecting geographic longitude/latitude coordinates (EPSG:4326).
     band:
       type:
         type: array

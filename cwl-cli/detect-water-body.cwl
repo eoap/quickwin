@@ -36,7 +36,7 @@ requirements:
     - name: '#CRS'
       type: enum
       symbols:
-      - EPSG:4326
+      - EPSG4326
     - name: '#Band'
       type: enum
       symbols:
@@ -67,8 +67,9 @@ inputs:
     type: CRS
     inputBinding:
       prefix: --epsg
+      valueFrom: $("EPSG:4326")
     label: epsg
-    doc: Coordinate reference system of the bounding box.
+    doc: EPSG4326 enum selecting geographic longitude/latitude coordinates (EPSG:4326).
   band:
     type:
       type: array
@@ -86,7 +87,6 @@ outputs:
     doc: Self-contained STAC catalog and georeferenced water mask.
 $namespaces:
   s: https://schema.org/
-  EPSG: http://www.opengis.net/def/crs/EPSG/0/
 s:softwareVersion: 2.0.0
 s:codeRepository: https://github.com/eoap/quickwin
 s:license: https://spdx.org/licenses/CC-BY-NC-SA-4.0
