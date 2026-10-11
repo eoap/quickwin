@@ -25,6 +25,11 @@ jobs:
           .venv/bin/python scripts/cwl-docs.py --validate
           .venv/bin/python -m ipykernel install --user --name quickwin_env
           .venv/bin/python -m bash_kernel.install
+      - name: Check transpiler-mate metadata
+        run: |
+          uv venv .oci-venv
+          uv pip sync --python .oci-venv/bin/python --require-hashes requirements-oci.txt
+          PATH="$PWD/.oci-venv/bin:$PATH" .oci-venv/bin/python scripts/check-metadata.py
       - name: Install notebook tools
         run: |
           sudo apt-get update

@@ -11,3 +11,6 @@ practice-labs/Dockerfile
 practice-labs/requirements.txt
 practice-labs/params.yaml
 practice-labs/output.json
+
+.venv/
+.oci-venv/

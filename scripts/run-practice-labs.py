@@ -66,6 +66,11 @@ def main():
                 allow_errors=False,
                 resources={"metadata": {"path": str(source.parent)}},
             ).execute()
+            for cell in notebook.cells:
+                for item in cell.get("outputs", []):
+                    text = item.get("text", "")
+                    if "EOAP_CELL_FAILED:" in text or "Restarting Bash" in text:
+                        raise RuntimeError(f"Bash command failed: {text}")
         except Exception as error:
             print(f"FAILED {relative}: {error}", file=sys.stderr, flush=True)
             return 1

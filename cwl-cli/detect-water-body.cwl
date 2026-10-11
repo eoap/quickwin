@@ -91,9 +91,24 @@ s:softwareVersion: 2.0.0
 s:codeRepository: https://github.com/eoap/quickwin
 s:license: https://spdx.org/licenses/CC-BY-NC-SA-4.0
 s:author:
-- class: s:Person
+- '@type': s:Person
+  s:givenName: Parham
+  s:familyName: Membari
   s:name: Parham Membari
   s:email: parham.membari@terradue.com
+  s:affiliation: &id001
+    '@type': s:Organization
+    s:name: Terradue
+    s:url: https://www.terradue.com
 label: Water body detection
 doc: Detect water around Lake Almanor using Sentinel-2 green and near-infrared bands,
   NDWI and Otsu thresholding.
+s:name: Quickwin water body detection
+s:description: Detect water around Lake Almanor using real Sentinel-2 COG assets,
+  NDWI and Otsu thresholding.
+s:dateCreated: '2022-09-01'
+s:publisher: *id001
+s:softwareHelp:
+  '@type': s:CreativeWork
+  s:name: Quickwin learning module
+  s:url: https://eoap.github.io/quickwin/

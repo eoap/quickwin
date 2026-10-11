@@ -5,7 +5,7 @@ import pystac
 import rasterio
 from rasterio.warp import transform_bounds
 root = Path(__file__).resolve().parents[1]
-for directory in (root / 'practice-labs', root / 'runs'):
+for directory in (root / 'practice-labs', root / 'runs', root / 'runs/cwl-cli', root / 'runs/cwl-workflow'):
     catalog = pystac.Catalog.from_file(str(directory / 'catalog.json'))
     items = list(catalog.get_all_items())
     assert items, f'Empty catalog: {directory}'
