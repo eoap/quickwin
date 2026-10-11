@@ -6,8 +6,8 @@ requirements:
     envDef:
       PYTHONPATH: /app
   ResourceRequirement:
-    coresMax: 1
-    ramMax: 512
+    coresMax: 2
+    ramMax: 4096
   DockerRequirement:
     dockerPull: localhost/detect-water-body:latest
   SchemaDefRequirement:
