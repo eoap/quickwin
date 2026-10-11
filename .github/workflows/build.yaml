@@ -23,6 +23,7 @@ jobs:
           uv venv .venv
           uv pip sync --python .venv/bin/python --require-hashes requirements-notebooks.txt
           .venv/bin/python scripts/cwl-docs.py --validate
+          .venv/bin/mkdocs build --strict
           .venv/bin/python -m ipykernel install --user --name quickwin_env
           .venv/bin/python -m bash_kernel.install
       - name: Check transpiler-mate metadata
