@@ -1,4 +1,8 @@
 import os
+
+os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
+os.environ.setdefault("GDAL_HTTP_TIMEOUT", "60")
+os.environ.setdefault("GDAL_HTTP_MAX_RETRY", "3")
 import click
 import pystac
 import rasterio
