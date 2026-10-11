@@ -28,3 +28,19 @@ To facilitate this process, developers are guided through the tutorial using int
 The webpage of the documentation is https://eoap.github.io/quickwin. 
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC_BY--SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
+## Typed CWL release preparation
+
+The `feature/typed-cwl-release` branch prepares version 2.0.0. Both standalone
+CWL documents use CWL v1.2 with embedded URI and bounding-box records and CRS
+and band enums. Jobs are in `cwl-cli/params.yaml` and `cwl-workflow/params.yaml`.
+The four notebooks process real Sentinel-2 data around Lake Almanor; they build
+the locked processing image locally before running the CWL lessons.
+
+Install `requirements-notebooks.txt` with `uv pip sync --require-hashes` using
+Python 3.12. Run `python scripts/cwl-docs.py --validate` to validate standalone
+contracts and generate Markdown. Run `scripts/run-practice-labs.py` with the
+Quickwin workspace and `quickwin_env` kernel, then `scripts/check-results.py`
+to verify the generated STAC assets, geographic bounds and binary water masks.
+CI repeats all four notebooks from a clean checkout. Stable publication is an
+explicit workflow dispatch on main after acceptance; artifacts contain immutable
+GHCR image references, matching typed jobs and checksums. No CWL packing is used.

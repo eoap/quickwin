@@ -5,3 +5,9 @@ catalog.json
 S2A*
 S2B*
 *.tif
+site/
+practice-labs/app.py
+practice-labs/Dockerfile
+practice-labs/requirements.txt
+practice-labs/params.yaml
+practice-labs/output.json

@@ -1,127 +1,86 @@
-name: build
+name: acceptance and publication
 on:
   push:
-    branches:
-    - master
-    - main
-    - bids23
-
-    paths:
-    # Only rebuild website when apps have changed
-    - 'water-bodies/**'
-    - .github/**
-    - docs/**
-    - cwl-workflow/*.cwl
-    - codemeta.json
-    - practice-labs/**
-    
+    branches: [main, 'feature/**']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+permissions:
+  contents: read
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  acceptance:
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.x
-    - run: pip install cwltool
-    - run: cwltool --validate cwl-workflow/app-water-body-cloud-native.cwl
-
-  version:
-    needs: validate
-
-    runs-on: ubuntu-latest
-
-    outputs:
-
-      app-version: ${{ steps.set-version.outputs.version }}
-
-    steps:
-    - uses: actions/checkout@v2
-    - run: echo "APP_VERSION=$(cat codemeta.json | jq -r .version )" >> $GITHUB_ENV
-    - run: echo app version is $APP_VERSION
-    - id: set-version
-      run: echo "::set-output name=version::$APP_VERSION"
-
-  container-build:
-
-    needs: version
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2   
-    - run: echo version ${{needs.version.outputs.app-version}}
-    - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-    - name: build & push image
-      run: |
-        IMAGE_ID=ghcr.io/eoap/quickwin/detect-water-body
-        docker build water-bodies/command-line-tools/detect-water-body --file water-bodies/command-line-tools/detect-water-body/Dockerfile --tag detect-water-body
-        docker tag detect-water-body $IMAGE_ID:${{needs.version.outputs.app-version}}
-        docker push $IMAGE_ID:${{needs.version.outputs.app-version}}
-
-  create-release:
-
-    needs:
-    - container-build
-    - version
-
-    runs-on: ubuntu-latest
-
-    outputs:
-
-      upload_url: ${{ steps.set-upload-url.outputs.upload_url }}
-
-    steps:
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          draft: false
-          prerelease: false
-          release_name: ${{needs.version.outputs.app-version}}
-          tag_name: ${{needs.version.outputs.app-version}}
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+      - run: |
+          uv venv .venv
+          uv pip sync --python .venv/bin/python --require-hashes requirements-notebooks.txt
+          .venv/bin/python scripts/cwl-docs.py --validate
+          .venv/bin/python -m ipykernel install --user --name quickwin_env
+          .venv/bin/python -m bash_kernel.install
+      - name: Install notebook tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman uidmap
+          curl -fsSL https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64 -o /tmp/yq
+          sudo install /tmp/yq /usr/local/bin/yq
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Execute all four real-data notebooks
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-      - id: set-upload-url
-        run: echo "::set-output name=upload_url::${{ steps.create_release.outputs.upload_url }}"
-
-  publish-artifacts:
-
-    needs:
-    - create-release
-    - version
-
-    runs-on: ubuntu-latest
-
-    steps:   
-    - uses: actions/checkout@v2 
-    - run: |
-        
-        tag="ghcr.io/eoap/quickwin/detect-water-body:${{needs.version.outputs.app-version}}"
-        docker pull ${tag}
-        shatag=$( docker inspect ${tag} | yq -r '.[0]["RepoDigests"][0]' )
-        s="detect-water-body" t="${shatag}" yq -i eval '(.$graph[] | select (.id == env(s)) ).hints.DockerRequirement.dockerPull = env(t)' cwl-workflow/app-water-body-cloud-native.cwl
-
-    - run: |
-        r=$( cat codemeta.json | jq -r ".codeRepository" ) yq -i eval '."s:codeRepository" = {"URL" : env(r)}' cwl-workflow/app-water-body-cloud-native.cwl
-        v="${{needs.version.outputs.app-version}}" yq -i eval '."s:softwareVersion" = env(v)' cwl-workflow/app-water-body-cloud-native.cwl
-        n=$(cat codemeta.json | jq -r '(.author[0].givenName + " " + .author[0].familyName)') \
-        e=$(cat codemeta.json | jq -r '.author[0].email') \
-        a=$(cat codemeta.json | jq -r '.author[0].affiliation["name"]') \
-        yq eval -i  '."s:author" += [{"class": "s:Person", "s.name": env(n), "s.email": env(e), "s.affiliation": env(a)}]' cwl-workflow/app-water-body-cloud-native.cwl
-    - run: |
-        mkdir downloads
-        cp cwl-workflow/app-water-body-cloud-native.cwl downloads/app-water-body-cloud-native.${{needs.version.outputs.app-version}}.cwl
-    - uses: actions/upload-artifact@v4
-      with:
-        name: application-package
-        path: downloads
-    - name: upload linux artifact 1
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{needs.create-release.outputs.upload_url}}
-        asset_path: downloads/app-water-body-cloud-native.${{needs.version.outputs.app-version}}.cwl
-        asset_name: app-water-body-cloud-native.${{needs.version.outputs.app-version}}.cwl
-        asset_content_type: text/yaml
+          QUICKWIN_WORKSPACE: ${{ github.workspace }}
+          VIRTUAL_ENV_DISABLE_PROMPT: '1'
+        run: |
+          export PATH="$PWD/.venv/bin:$PATH"
+          python scripts/run-practice-labs.py --workspace "$PWD" --python-kernel quickwin_env --output /tmp/quickwin-results
+          python scripts/check-results.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: acceptance-evidence
+          path: /tmp/quickwin-results
+  publish:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/main'
+    needs: acceptance
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(python -c 'import json; print(json.load(open("codemeta.json"))["version"])')
+          if gh release view "$version" >/dev/null 2>&1; then echo "Release already exists" >&2; exit 1; fi
+          image="ghcr.io/eoap/quickwin/detect-water-body:$version"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          if docker manifest inspect "$image" >/dev/null 2>&1; then echo "Image tag already exists" >&2; exit 1; fi
+          docker build -t "$image" water-bodies/command-line-tools/detect-water-body
+          docker push "$image"
+          docker pull "$image"
+          docker inspect "$image" --format '{{index .RepoDigests 0}}' > /tmp/image-digest
+          uv venv .venv
+          uv pip sync --python .venv/bin/python --require-hashes requirements-notebooks.txt
+          .venv/bin/python scripts/prepare-release.py --image "$(cat /tmp/image-digest)"
+          .venv/bin/python scripts/cwl-docs.py --validate
+          mkdir -p downloads
+          cp cwl-workflow/app-water-body-cloud-native.cwl "downloads/app-water-body-cloud-native.$version.cwl"
+          cp cwl-cli/detect-water-body.cwl "downloads/detect-water-body.$version.cwl"
+          cp cwl-cli/params.yaml downloads/cli-params.yaml
+          cp cwl-workflow/params.yaml downloads/workflow-params.yaml
+          cp requirements-notebooks.txt downloads/
+          (cd downloads && sha256sum * > SHA256SUMS)
+          tar czf "quickwin.$version.tar.gz" -C downloads .
+          gh release create "$version" "quickwin.$version.tar.gz" downloads/* --target "$GITHUB_SHA" --title "$version" --notes 'Typed CWL v1.2 contracts, locked runtime dependencies, and acceptance-tested real Sentinel-2 processing.'
