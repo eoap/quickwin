@@ -1,14 +1,4 @@
-export WORKSPACE=/workspace/quickwin
-
-command -v podman >/dev/null 2>&1 && { 
-    flag="--podman"
-}
-
-cwltool ${flag} \
-    --outdir ${WORKSPACE}/runs \
-    ${WORKSPACE}/cwl-workflow/app-water-body-cloud-native.cwl \
-    --item "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_10TFK_20210713_0_L2A" \
-    --aoi="-121.399,39.834,-120.74,40.472" \
-    --epsg "EPSG:4326" \
-    --band "green" \
-    --band "nir" 
+#!/bin/bash
+set -euo pipefail
+workspace=${QUICKWIN_WORKSPACE:-/workspace/quickwin}
+cwltool --podman --outdir "$workspace/runs/workflow" "$workspace/cwl-workflow/app-water-body-cloud-native.cwl" "$workspace/cwl-workflow/params.yaml"

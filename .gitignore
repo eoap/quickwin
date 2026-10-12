@@ -5,3 +5,23 @@ catalog.json
 S2A*
 S2B*
 *.tif
+site/
+practice-labs/app.py
+practice-labs/Dockerfile
+practice-labs/requirements.txt
+practice-labs/params.yaml
+practice-labs/output.json
+
+.venv/
+.oci-venv/
+
+practice-labs/cwl-cli-output.json
+practice-labs/cwl-workflow-output.json
+
+# Generated Hatch build context for the container practice lab.
+practice-labs/.dockerignore
+practice-labs/pyproject.toml
+practice-labs/README.md
+practice-labs/LICENSE.md
+practice-labs/requirements/
+practice-labs/detect_water_body/

@@ -1,0 +1,9 @@
+{
+  "source_commit": "7341f9f0c120e501b2d51c23c70a4b14e94012a7",
+  "cluster": "eoap-mastering-app-package-docker",
+  "unit_tests_passed": 5,
+  "format_lint_type_security_passed": true,
+  "real_processing_evidence": "rocky-minikube-3526c18.json",
+  "full_fresh_notebook_acceptance_passed": false,
+  "published_candidate_acceptance_passed": false
+}
