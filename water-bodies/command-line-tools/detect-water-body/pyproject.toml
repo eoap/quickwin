@@ -33,7 +33,7 @@ detect-water-body = "detect_water_body.main:main"
 extra-dependencies = ["mypy==1.19.1"]
 
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/crop tests}"
+check = "mypy --install-types --non-interactive {args:detect_water_body app.py}"
 
 [tool.hatch.envs.test]
 template = "dev"
@@ -72,14 +72,13 @@ packages = ["detect_water_body"]
 include = ["/detect_water_body", "/app.py", "/README.md", "/LICENSE.md", "/pyproject.toml", "/Dockerfile", "/requirements", "/typing", "/tests"]
 
 [tool.coverage.run]
-source_pkgs = ["crop", "tests"]
+source_pkgs = ["detect_water_body"]
 branch = true
 parallel = true
-omit = ["src/crop/__about__.py"]
 
 [tool.coverage.paths]
-crop = ["src/crop", "*/crop/src/crop"]
-tests = ["tests", "*/crop/tests"]
+detect_water_body = ["detect_water_body", "*/detect-water-body/detect_water_body"]
+tests = ["tests", "*/detect-water-body/tests"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
@@ -89,7 +88,6 @@ testpaths = ["tests"]
 addopts = "--import-mode=importlib"
 
 [tool.ruff]
-extend-exclude = ["src/crop/cli.py"]
 line-length = 100
 target-version = "py312"
 
